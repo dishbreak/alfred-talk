@@ -12,6 +12,19 @@
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
 
+		<style type="text/css">
+		html.dimbg .slide-background {
+			opacity: 0.4 !important;
+		}
+
+		.reveal.reveal img {
+		    border: none;
+		    box-shadow: none;
+		    max-height: calc(66vh);
+		    max-width: calc(66vw);
+		}
+		</style>
+
 		<!-- Printing and PDF exports -->
 		<script>
 			var link = document.createElement( 'link' );
@@ -42,16 +55,16 @@
 						## What does it do?
 						Well, let's highlight a few examples.
 					</section>
-					<section>
+					<section data-background-color="#D1D1D1">
 						<h2>Find files on your filesystem.</h2>
 						<img src="img/file_search.gif" border="0">
 					</section>
-					<section>
-						<h2>Launch Applications.</h2>
+					<section data-background-color="#D1D1D1">
+						<h2>Launch Applications</h2>
 						<img src="img/app_launcher.gif" border="0">
 					</section>
-					<section>
-						<h2>Search Google.</h2>
+					<section data-background-color="#D1D1D1">
+						<h2>Search Google</h2>
 						<img src="img/google_keyword.gif" border="0">
 					</section>
 					<section>
@@ -61,21 +74,189 @@
 						<p class="fragment">You'll need a paid add-on called the Powerpack for a lot of the features in this talk.</p>
 					</section>
 					<section>
-						<h2>Is the Powerpack worth it></h2>
+						<h2>Is the Powerpack worth it?</h2>
 						<p>I think so! But I'm biased.</p>
 						<p>The powerpack enables way more useful functionality.</p>
 					</section>
 					<section>
 						<h2>For Example...</h2>
 					</section>
-					<section>
-						<h2>Getting Google Suggestions as You Type.</h2>
+					<section data-background-color="#D1D1D1">
+						<h2>Live Google Suggestions</h2>
 						<img src="img/google_search.gif" border="0">
 					</section>
-					<section>
+					<section data-background-color="#D1D1D1">
 						<h2>Browsing your clipboard</h2>
 						<img src="img/clipboard_viewer.gif">
 					</section>
+				</section>
+				<section>
+					<section data-background-image="img/workflow.png" data-state="dimbg">
+						<h2>Workflows</h2>
+						<p class="fragment">Event-driven automation, backed by Alfred.</p>
+						<p class="fragment">Trigger things with hotkeys or Alfred Keywords.</p>
+						<p class="fragment">Built with filters and actions.</p>
+					</section>
+					<section>
+						<h2>Hotkeys and Keywords</h2>
+						<p class="fragment">Alfred can listen for key-combinations and use them to start workflows.</p>
+						<p class="fragment">Alfred can also respond to keywords typed into the search bar.</p>
+					</section>
+					<section>
+						<h2>Filters</h2>
+						<p class="fragment">Present a list of items for Alfred to display.</p>
+						<p class="fragment">Can optionally be bound to a keyword</p>
+						<p class="fragment">Two variants, Script and List.</p>
+						<img src="img/filter.png" width="auto" height="350pt">
+					</section>
+					<section>
+						<h2>Actions</h2>
+						<p class="fragment">Typically an end to the workflow.</p>
+						<p class="fragment">Can be lots of things!</p>
+						<ul class="fragment">
+							<li>Run Scripts</li>
+							<li>Launch URLs</li>
+							<li>Copy to Clipboard</li>
+							<li>...and way more</li>
+						</ul>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h1>Practical Demo of a Simple Workflow</h1>
+					</section>
+				</section>
+				<section>
+					<section>
+						<h1>What if I need Something more dynamic?</h1>
+					</section>
+					<section>
+						<h2>Script Filters</h2>
+						<p class="fragment">Like list filters, but they invoke a script in order to get a list of items.</p>
+						<p class="fragment">They can update dynamically as you type.</p>
+						<img src="img/google_search.gif" height="350pt" class="fragment">
+					</section>
+					<section>
+						<h2>Alfred Workflow Python</h2>
+						<p class="fragment">An Alfred community member created <a href="https://github.com/deanishe/alfred-workflow">alfred-workflow</a>, a Python library.</p>
+						<ul class="fragment">
+							<li>Send notifications</li>
+							<li>Cache data</li>
+							<li>Manage passwords/configuration</li>
+							<li>Auto-update</li>
+							<li>And a whole lot else!</li>
+						</ul>
+						<p class="fragment">The alfred-workflow package is useful for scripts and script filters, but a script filter is a great place to start!</p>
+					</section>
+					<section data-markdown>
+						## Getting Started
+
+						```
+						from workflow import Workflow3
+
+						def main(wf):
+							...
+
+						if __name__ == '__main__':
+							wf = Workflow3()
+							sys.exit(wf.run(main))
+						```
+
+						Instantiate a `Workflow3` object, and delegate the `main()` function to it. 
+
+						The `Workflow3` object will invoke the main function and pass itself in as a reference.
+
+					</section>
+					<section data-markdown>
+						## Adding Items to Filter
+
+						The `wf` object has methods for adding items to the filter view.
+
+						```
+						def main(wf):
+							items = [
+								{
+									"title": "foo",
+									"subtitle": "text for subtitle",
+									"arg" = "foo", 
+								},
+								...
+							]
+							for item in items:
+								wf.add_item(**item)
+							wf.send_feedback()
+						```
+					</section>
+					<section data-markdown>
+						## Making web requests
+
+						Workflow includes a `web` module for making requests. It's got 85% of the features you'd need, in a much smaller footprint.
+
+						```
+						from workflow import web
+
+						def request_repos_from_github(github_token):
+							headers = {
+								"Authorization": "token {}".format(github_token)
+							}
+							url = "https://api.github.com/user/repos"
+							response = web.get(url, headers=headers)
+							response.raise_for_status()
+							return response.json()
+						```
+					</section>
+					<section data-markdown>
+						## Caching Data
+						You may want to hold on to data for a bit. Workflow has you covered.
+
+						```
+						from github import request_repos_from_github
+
+						def main(wf):
+							github_api_token = ...
+							repos = wf.cached_data("repo_cache", 
+								lambda: request_repos_from_github(github_api_token),
+								max_age=3600)
+							for repo in repos:
+								wf.add_item(...)
+							wf.send_feedback()
+						```
+					</section>
+					<section data-markdown>
+						## Config and Secrets
+						Got sensitive stuff or stuff that you want users to be able to modify? No problem.
+
+						```
+						# Saving/retrieving settings
+						wf.settings['repos']['timeout'] = 300
+						wf.settings.save()
+						...
+						timeout = wf.settings['repos']['timeout']
+
+						# Saving/retrieving passwords from macOS Keychain
+						wf.save_password("github_token", "huuhhuhuhhuhuhuhu")
+						...
+						### Throws workflow.PasswordNotFound if not found.
+						github_token = wf.get_password("github_token")  
+						wf.delete_password("github_token") # Removes from keychain
+						```
+					</section>
+					<section data-markdown>
+						## And Much More!
+
+						The <a href="http://www.deanishe.net/alfred-workflow/index.html">alfred-workflow</a> website is a <em>huge</em> resource. Check it out!
+					</section>
+				</section>
+				<section>
+					<section data-markdown>
+						## Wrap-Up
+						* We talked about Alfred, a productivity booster.
+						* We went over the nuts and bolts of Workflows.
+						* We talked about the alfred-workflow package.
+					</section>
+				</section>
+				<section>
+					<h1>Thanks for Listening!</h1>
 				</section>
 			</div>
 		</div>
@@ -95,6 +276,14 @@
 					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
 				]
 			});
+			window.addEventListener("mousedown", handleClick, false);
+			window.addEventListener("contextmenu", function(e) { e.preventDefault(); }, false);
+
+			function handleClick(e) {
+				e.preventDefault();
+				if(e.button === 0) Reveal.next(); 
+				if(e.button === 2) Reveal.prev(); 
+			}
 		</script>
 	</body>
 </html>
