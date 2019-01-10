@@ -252,7 +252,7 @@
 						# Let's Make Some Secrets
 					</section>
 					<section data-markdown>
-						# OneTimeSecret Example
+						## OneTimeSecret Example
 
 						Our goal is to create a workflow that will create secrets on [onetimesecret.com](onetimesecret.com)
 
@@ -267,6 +267,49 @@
 						4. Copy the resulting URL
 						5. Notify the user
 					</section>
+					<section data-markdown>
+						## Final Script
+						```
+						import sys
+						from workflow import Workflow, web
+
+						ROOT_URL = "https://onetimesecret.com"
+						API_KEY = "BLEEP"
+						USERNAME = "vkotcherlakota@kotcherlakota.com"
+
+						HOUR = 60 #seconds
+						DAY = 24 * HOUR
+						WEEK = 7 * DAY	
+
+						def make_secret(url, user, api_key, plaintext):
+							response = web.post(url + "/api/v1/share",
+								params=dict(
+									secret=plaintext,
+									ttl=WEEK,
+								),
+								auth=(user, api_key)
+							)
+							response.raise_for_status()
+
+							secret_key = response.json()['secret_key']
+							return url + "/secret/" + secret_key
+
+						def main(wf):
+							plaintext = wf.args[0]
+							wf.logger.debug("Input is '{}'".format(plaintext))
+							secret_url = make_secret(ROOT_URL, USERNAME, API_KEY, plaintext)
+							wf.logger.debug("Secret url is '{}'".format(secret_url))
+							print(secret_url)
+
+						if __name__ == '__main__':
+							wf = Workflow()
+							sys.exit(wf.run(main))
+						```
+					</section>
+					<section>
+						<h2>Finished Workflow</h2>
+						<img src="img/finished-flow.png" width="900px" height="auto">
+					</section>
 				</section>
 				<section>
 					<section data-markdown>
@@ -274,6 +317,7 @@
 						* We talked about Alfred, a productivity booster.
 						* We went over the nuts and bolts of Workflows.
 						* We talked about the alfred-workflow package.
+						* We built a practical, useful workflow, right here!
 					</section>
 				</section>
 				<section>
